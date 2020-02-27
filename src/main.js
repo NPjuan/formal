@@ -3,6 +3,9 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+// 全局注册组件
+import clock from './components/clock'
+Vue.component('clock',clock)
 
 Vue.config.productionTip = false
 
