@@ -1,6 +1,6 @@
 <template>
     <div>
-      <clock @timeout="timeout"></clock>
+      <clock @timeout="timeout" class="clock" :count="180"></clock>
     </div>
 </template>
 
@@ -16,5 +16,9 @@
 </script>
 
 <style scoped>
-
+  .clock{
+    position: absolute;
+    left: 10%;
+    top: 15%;
+  }
 </style>

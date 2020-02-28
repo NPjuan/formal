@@ -18,6 +18,10 @@ export default {
   mounted() {
     // 在 1600px 宽度下 1 rem = 10 px
     // 在 1980px 宽带下 1 rem = 12 px
+    window.onresize = function() {
+      let html = document.querySelector('html');
+      html.style.fontSize = document.documentElement.clientWidth / 160 + 'px';
+    }
     let html = document.querySelector('html');
     html.style.fontSize = document.documentElement.clientWidth / 160 + 'px';
     // 判断用户是否操作的计时器

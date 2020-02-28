@@ -7,14 +7,14 @@
           <div class="center-show">
             <img src="../assets/title.png" alt="title" class="center-title">
             <img src="../assets/recovery.png" alt="recovery" class="center-recovery">
-            <button class="center-operation">我要回收</button>
+            <button class="center-operation" @click="bottle">我要回收</button>
           </div>
         </transition>
       </div>
     <!--侧边栏-->
     <div id="side">
       <img src="../assets/brushFaceLogin.png" alt="brushFace" @click="brushFace">
-      <img src="../assets/yct.png" alt="yct">
+      <img src="../assets/yct.png" alt="yct" @click="yct">
       <img src="../assets/Instructions.png" alt="instructions" @click="instruction">
     </div>
   </div>
@@ -30,8 +30,14 @@
       }
     },
     methods: {
+      bottle() {
+        this.$router.push('/bottle')
+      },
       brushFace() {
         this.$router.push('/brushFace')
+      },
+      yct() {
+        this.$router.push('/yct')
       },
       instruction() {
         this.$router.push('/instructions')
