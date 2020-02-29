@@ -61,7 +61,7 @@
     width: 28%;
     height: 48%;
     background-image: url("../assets/center.png");
-    background-size: 100%;
+    background-size: 100% 100%;
     background-repeat: no-repeat;
   }
   .center-show{
