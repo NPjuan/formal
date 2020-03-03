@@ -1,9 +1,10 @@
 <template>
   <!--人脸识别-->
-  <div id="center">
+  <div id="center" @click="drawPic">
     <div class="center-show">
       <video ref="video" style="width: 100%;height: 100%;"></video>
     </div>
+    <canvas ref="canvas"></canvas>
     <clock
       @timeout="timeout"
       :count="60"
@@ -16,7 +17,7 @@
     name: "BrushFace",
     data() {
       return {
-
+        formData: new FormData()
       }
     },
     methods: {
@@ -25,6 +26,39 @@
         this.mediaStreamTrack && this.mediaStreamTrack.stop();
         this.$router.go(-1)
         console.log('关闭')
+      },
+      drawPic() {
+        let canvas = this.$refs.canvas
+        let video = this.$refs.video
+        canvas.getContext("2d").drawImage(video, 0, 0, 300, 150);
+        // // 变为 base64
+        // var url = canvas.toDataURL('image/jpeg')
+        // var file = this.dataURLtoFile(url, 'file')
+        // console.log(file)
+        // formData.append('file', file)
+        // this.sendPic(formData)
+        canvas.toBlob((blob) => {
+          let formData = new FormData()
+          let file = new File(
+            [blob],
+            'face.jpg', // 这里后缀名一定要 jpg 格式
+            { type: 'image/jpeg' }
+          );
+          console.log(file)
+          formData.append('file', file)
+          this.sendPic(formData)
+        })
+      },
+      sendPic(formData) {
+        this.$axios.post('/face/uploadFacePicture.do',formData)
+          .then((res)=>{
+            let user = res.data.data
+            this.$bus.set(user)
+          })
+          .catch((err)=>{
+            console.log(err)
+          })
+
       }
     },
     mounted() {
@@ -57,7 +91,7 @@
     /*宽高自适应*/
     width: 28%;
     height: 48%;
-    background-image: url("../assets/center.png");
+    background-image: url("../assets/resource/center.png");
     background-size: 100%;
     background-repeat: no-repeat;
   }
@@ -73,5 +107,14 @@
     position: absolute;
     top: 0;
     right: -7rem;
+  }
+  canvas{
+    position: absolute;
+    left: 0;
+    top:0;
+    width: 500px;
+    height: 500px;
+    z-index: -100;
+    opacity: 0;
   }
 </style>

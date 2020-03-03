@@ -5,17 +5,17 @@
         <transition name="fade">
           <!--操作选框-->
           <div class="center-show">
-            <img src="../assets/title.png" alt="title" class="center-title">
-            <img src="../assets/recovery.png" alt="recovery" class="center-recovery">
+            <img src="../assets/resource/title.png" alt="title" class="center-title">
+            <img src="../assets/resource/recovery.png" alt="recovery" class="center-recovery">
             <button class="center-operation" @click="bottle">我要回收</button>
           </div>
         </transition>
       </div>
     <!--侧边栏-->
     <div id="side">
-      <img src="../assets/brushFaceLogin.png" alt="brushFace" @click="brushFace">
-      <img src="../assets/yct.png" alt="yct" @click="yct">
-      <img src="../assets/Instructions.png" alt="instructions" @click="instruction">
+      <img v-if="!$bus.get('id')" src="../assets/resource/brushFaceLogin.png" alt="brushFace" @click="brushFace">
+      <img src="../assets/resource/yct.png" alt="yct" @click="yct">
+      <img src="../assets/resource/Instructions.png" alt="instructions" @click="instruction">
     </div>
   </div>
 </template>
@@ -25,6 +25,7 @@
     name: "HomePage",
     data() {
       return {
+        timer: null,
         isBrushFace: false,
         mediaStreamTrack: {}
       }
@@ -42,6 +43,22 @@
       instruction() {
         this.$router.push('/instructions')
       }
+    },
+    mounted() {
+      let time = 180
+      this.timer = setInterval(() => {
+        if (time) {
+          time--
+        } else {
+          clearInterval(this.timer)
+          this.$router.push('/')
+        }
+      }, 1000)
+    },
+    beforeDestroy() {
+      // 重置个人信息
+      this.$bus.reset()
+      clearInterval(this.timer)
     }
   }
 </script>
@@ -60,7 +77,7 @@
     /*宽高自适应*/
     width: 28%;
     height: 48%;
-    background-image: url("../assets/center.png");
+    background-image: url("../assets/resource/center.png");
     background-size: 100% 100%;
     background-repeat: no-repeat;
   }
@@ -106,7 +123,7 @@
   #side{
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: space-around;
     position: absolute;
     right: 0;
     top:50%;

@@ -16,7 +16,7 @@
         <div v-if="!confirm" style="height: 12.5%;margin: 6% auto;text-align: center"><span class="btn" @click="finish">完成回收</span></div>
         <div v-else class="bottom-container">
           <div class="gifts-container">
-            <div class="gift-border" v-for="item in gifts">
+            <div class="gift-border" v-for="(item, index) in gifts" @click="pick(index)">
               <div class="gift">
                 <img :src="item.src" alt="gift">
               </div>
@@ -30,9 +30,10 @@
         </div>
       </div>
       <!--使用小框-->
-      <div v-else style="position: relative;width: 100%;height: 100%" @click="menuSize = true" key="small">
+      <div v-else style="position: relative;width: 100%;height: 100%" key="small">
         <clock @timeout="timeout_a" class="clock" :count="3"></clock>
-        <p class="title left-title">当前可回收瓶子是塑料瓶</p>
+        <p v-if="!isPick" class="title left-title">当前可回收瓶子是塑料瓶</p>
+        <p v-else class="title left-title">当前兑换礼品是{{giftDes}}</p>
         <!--底部确认按钮-->
         <div style="height: 18%;margin-top: 13%;text-align: center;display: flex;justify-content: space-around">
           <span class="btn btn-small" @click="finish">确认</span>
@@ -49,6 +50,7 @@
     data() {
       return {
         menuSize: true,  // true 为大尺寸
+        isPick: false,
         plasticBottles: 2,  //  塑料瓶
         cans: 0,            // 易拉罐
         others: 5,          // 其他瓶子
@@ -62,7 +64,8 @@
             des: '超市购物券',
             src: require('../assets/resource/qian3.svg')
           },
-        ]
+        ],
+        giftDes: ''
       }
     },
     methods: {
@@ -72,6 +75,9 @@
       timeout_a() {
         // 自动回收
         this.menuSize = true
+      },
+      pick(index) {
+        [this.menuSize, this.isPick, this.giftDes] = [false, true, this.gifts[index]['des']]
       },
       finish() {
        this.confirm = true

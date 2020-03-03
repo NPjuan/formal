@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 Vue.use(Router)
 
+import Advisement from '../components/Advisement'
 import HomePage from '../components/HomePage'
 import Bottle from '../components/Bottle'
 import Instructions from '../components/Instructions'
@@ -11,8 +12,13 @@ import YCT from '../components/YCT'
 export default new Router({
   routes: [
     {
-      name: 'HomePage',
+      name: 'Advisement',
       path: '/',
+      component: Advisement
+    },
+    {
+      name: 'HomePage',
+      path: '/homepage',
       component: HomePage
     },
     {
