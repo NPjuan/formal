@@ -54,6 +54,7 @@
           .then((res)=>{
             let user = res.data.data
             this.$bus.set(user)
+
           })
           .catch((err)=>{
             console.log(err)
@@ -106,7 +107,7 @@
   .time{
     position: absolute;
     top: 0;
-    right: -7rem;
+    right: -10rem;
   }
   canvas{
     position: absolute;

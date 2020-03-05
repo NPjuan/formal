@@ -1,7 +1,5 @@
 <template>
   <div id="app">
-    <!--获取条形码-->
-    <input type="text" ref="ipt" @input="barCode" maxlength="13" style="position: absolute;left:0;top:0;opacity: 0;z-index: -5">
     <router-view></router-view>
   </div>
 </template>
@@ -15,11 +13,7 @@ export default {
     }
   },
   methods: {
-    barCode () {
-      if (this.$refs.ipt.value.length === 13) {
-        console.log('hello')
-      }
-    }
+
   },
   mounted() {
     // 在 1600px 宽度下 1 rem = 10 px
@@ -30,9 +24,6 @@ export default {
     }
     let html = document.querySelector('html');
     html.style.fontSize = document.documentElement.clientWidth / 160 + 'px';
-    // 判断用户是否操作的计时器
-    // 开始时 focus
-    this.$refs.ipt.focus()
   }
 }
 </script>

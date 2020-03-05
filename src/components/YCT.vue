@@ -117,7 +117,7 @@
   box-sizing: border-box;
   letter-spacing: .5rem;
   font-size: 2.5rem;
-  padding-top: 13%;
+  padding-top: 13.5%;
   padding-left: 10rem;
 }
 .btn{

@@ -1,46 +1,50 @@
 <template>
-  <div :class="classes">
-    <transition name="fade" mode="out-in">
-      <!--使用大框-->
-      <div v-if="menuSize" style="position: relative;width: 100%;height: 100%" key="big">
-        <clock @timeout="timeout" class="clock" :count="180"></clock>
-        <p class="title">{{message.title}}</p>
-        <p class="point">{{message.subHead}}</p>
-        <!--积分榜-->
-        <div v-if="!confirm" class="option-container">
-          <div class="option"><span class="option-des">塑料瓶:</span><span class="option-num">{{plasticBottles}}</span></div>
-          <div class="option"><span class="option-des">易拉罐:</span><span class="option-num">{{cans}}</span></div>
-          <div class="option"><span class="option-des">其他:&emsp;</span><span class="option-num">{{others}}</span></div>
-        </div>
-        <!--底部确认按钮-->
-        <div v-if="!confirm" style="height: 12.5%;margin: 6% auto;text-align: center"><span class="btn" @click="finish">完成回收</span></div>
-        <div v-else class="bottom-container">
-          <div class="gifts-container">
-            <div class="gift-border" v-for="(item, index) in gifts" @click="pick(index)">
-              <div class="gift">
-                <img :src="item.src" alt="gift">
+  <div style="position: relative;width: 100%;height: 100%" @click="onFocus">
+    <div :class="classes">
+      <!--获取条形码-->
+      <input type="text" ref="ipt" @input="barCode" maxlength="13" style="position: absolute;left:0;top:0;opacity: 0;z-index: -5">
+      <transition name="fade" mode="out-in">
+        <!--使用大框-->
+        <div v-if="menuSize" style="position: relative;width: 100%;height: 100%" key="big">
+          <clock @timeout="timeout" class="clock" :count="180"></clock>
+          <p class="title">{{message.title}}</p>
+          <p class="point">{{message.subHead}}</p>
+          <!--积分榜-->
+          <div v-if="!finish" class="option-container">
+            <div class="option"><span class="option-des">塑料瓶:</span><span class="option-num">{{plasticBottles}}</span></div>
+            <div class="option"><span class="option-des">易拉罐:</span><span class="option-num">{{cans}}</span></div>
+            <div class="option"><span class="option-des">其他:&emsp;</span><span class="option-num">{{others}}</span></div>
+          </div>
+          <!--底部确认按钮-->
+          <div v-if="!finish" style="height: 12.5%;margin: 6% auto;text-align: center"><span class="btn" @click="complete">完成回收</span></div>
+          <div v-else class="bottom-container">
+            <div class="gifts-container">
+              <div class="gift-border" v-for="(item, index) in gifts" @click="pick(index)">
+                <div class="gift">
+                  <img :src="item.src" alt="gift">
+                </div>
+                <p class="gift-des">{{item.des}}</p>
               </div>
-              <p class="gift-des">{{item.des}}</p>
+            </div>
+            <div class="wx-code">
+              <img src="../assets/resource/wx.png" alt="wx">
+              <p>微信扫码兑换更多礼品</p>
             </div>
           </div>
-          <div class="wx-code">
-            <img src="../assets/resource/wx.png" alt="wx">
-            <p>微信扫码兑换更多礼品</p>
+        </div>
+        <!--使用小框-->
+        <div v-else style="position: relative;width: 100%;height: 100%" key="small">
+          <clock @timeout="timeout_a" class="clock" :count="60"></clock>
+          <p class="left-title" ref="Des">请等待</p>
+          <!--<p v-show="isPick" class="left-title" ref="giftDes">当前兑换礼品是{{giftDes}}</p>-->
+          <!--底部确认按钮-->
+          <div style="height: 18%;margin-top: 13%;text-align: center;display: flex;justify-content: space-around">
+            <span class="btn btn-small" @click="confirm">确认</span>
+            <span class="btn btn-small" @click="cancel">取消</span>
           </div>
         </div>
-      </div>
-      <!--使用小框-->
-      <div v-else style="position: relative;width: 100%;height: 100%" key="small">
-        <clock @timeout="timeout_a" class="clock" :count="3"></clock>
-        <p v-if="!isPick" class="title left-title">当前可回收瓶子是塑料瓶</p>
-        <p v-else class="title left-title">当前兑换礼品是{{giftDes}}</p>
-        <!--底部确认按钮-->
-        <div style="height: 18%;margin-top: 13%;text-align: center;display: flex;justify-content: space-around">
-          <span class="btn btn-small" @click="finish">确认</span>
-          <span class="btn btn-small" @click="finish">取消</span>
-        </div>
-      </div>
-    </transition>
+      </transition>
+    </div>
   </div>
 </template>
 
@@ -50,12 +54,11 @@
     data() {
       return {
         menuSize: true,  // true 为大尺寸
-        isPick: false,
-        plasticBottles: 2,  //  塑料瓶
+        plasticBottles: 2,  // 塑料瓶
         cans: 0,            // 易拉罐
         others: 5,          // 其他瓶子
-        confirm: false,      // 是否完成投递
-        gifts: [
+        finish: false,      // 是否完成投递
+        gifts: [            //  礼物信息
           {
             des: '环保袋',
             src: require('../assets/resource/pack.png')
@@ -65,7 +68,7 @@
             src: require('../assets/resource/qian3.svg')
           },
         ],
-        giftDes: ''
+        company: ''
       }
     },
     methods: {
@@ -77,15 +80,78 @@
         this.menuSize = true
       },
       pick(index) {
-        [this.menuSize, this.isPick, this.giftDes] = [false, true, this.gifts[index]['des']]
+        // 选中礼物
+        this.menuSize = false
+        setTimeout(()=>{
+          this.$refs.Des.innerHTML = `选择的礼物是${this.gifts[index]['des']}`
+        }, 250)
       },
-      finish() {
-       this.confirm = true
-      }
+      confirm() {
+        // 确认
+       this.menuSize = true
+        if (this.company !== '') {
+          // 如果存在种类，代表是投递瓶子状态
+          console.log(this.company)
+          switch (this.company) {
+            case '瓶': this.plasticBottles++;break
+            case '罐': this.cans++;break
+            default: this.others++
+          }
+          this.company = ''
+        }
+      },
+      cancel() {
+        // 取消
+        this.menuSize = true
+        this.company = ''
+      },
+      complete() {
+        // 完成
+        this.finish = true
+      },
+      barCode () {
+        let ipt = this.$refs.ipt
+        if (ipt.value.length === 13) {
+          let code = ipt.value
+          // 赋值为空 便于重新赋值
+          ipt.value = ''
+          this.$axios.post('/bottle/queryByNumber.do', {
+            number: code
+          })
+            .then((res)=>{
+              console.log(res)
+             // 如果接收不到数据
+              if (res.data.code === '1') {
+                throw error('无法识别瓶子')
+              }
+              this.menuSize = false // 小屏幕
+              return res.data.data
+            })
+            .then((mes)=>{
+              // 这里延迟 250 是等待动画结束才能获取 dom 元素
+              setTimeout(()=>{
+                this.$refs.Des.innerHTML = `当前回收的是${mes[0]['name']}`
+                this.company = mes[0]['company']
+              },250)
+            })
+            .catch((err)=>{
+              console.log(err); // 这里需要加分号，否则语法分析报错
+              [this.menuSize, this.botDes] = [
+                false,
+                `当前回收物品未能识别`
+              ]
+            })
+        }
+      },
+      onFocus() {
+      console.log('aaaa')
+      // 无论点击那里，最后都聚焦到 input
+      this.$refs.ipt.focus()
+    }
     },
     computed: {
       message() {
-        if (!this.confirm) {
+        if (!this.finish) {
           return {
             title: '请放入可回收塑料瓶',
             subHead: `当前积分：${this.point}`
@@ -107,6 +173,9 @@
       point() {
         return (this.plasticBottles + this.cans)*3
       }
+    },
+    mounted() {
+      this.onFocus()
     }
   }
 </script>
@@ -139,10 +208,13 @@
     color: rgb(0,245, 255);
   }
   .left-title{
+    box-sizing: border-box;
     letter-spacing: .5rem;
     font-size: 2.5rem;
-    padding-top: 12%;
+    text-align: center;
+    padding-top: 12.5%;
     padding-left: 10rem;
+    color: rgb(0,245, 255);
   }
   .point{
     box-sizing: border-box;
