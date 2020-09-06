@@ -1,9 +1,10 @@
 <template>
   <video
     @click="toggle"
-    src="../assets/ad/xxm.mp4"
+    src="../assets/ad/movie.mp4"
     id="advertisement"
-    loop></video>
+    autoplay
+    loop/>
 </template>
 
 <script>
@@ -13,6 +14,9 @@
       toggle() {
         this.$router.push('/homepage')
       }
+    },
+    beforeCreate() {
+      this.$bus.reset()
     }
   }
 </script>

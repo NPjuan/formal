@@ -18,6 +18,26 @@
         background-repeat: no-repeat;
         overflow: hidden;
       }
+      /*修改滚动条样式*/
+      *::-webkit-scrollbar{
+        width:5px;
+        height:5px;
+        /**/
+      }
+      *::-webkit-scrollbar-track{
+        background: rgba(239, 239, 239, .2);
+        border-radius:2px;
+      }
+      *::-webkit-scrollbar-thumb{
+        background: #bfbfbf;
+        border-radius:10px;
+      }
+      *::-webkit-scrollbar-thumb:hover{
+        background: #333;
+      }
+      *::-webkit-scrollbar-corner{
+        background: #179a16;
+      }
     </style>
   </head>
   <body>

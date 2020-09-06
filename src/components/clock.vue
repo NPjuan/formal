@@ -22,7 +22,7 @@
     },
     methods: {
       reset() {
-        this.time = this.count
+        this.$emit('timeout')
       }
     },
     mounted() {

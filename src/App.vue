@@ -1,6 +1,8 @@
 <template>
-  <div id="app">
-    <router-view></router-view>
+  <div id="app" @click.self="back">
+    <transition name="fade">
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -13,17 +15,18 @@ export default {
     }
   },
   methods: {
-
+    back(){
+      this.$router.go(-1)
+    }
   },
   mounted() {
     // 在 1600px 宽度下 1 rem = 10 px
     // 在 1980px 宽带下 1 rem = 12 px
-    window.onresize = function() {
+    // 先直接执行一次
+    (window.onresize = function() {
       let html = document.querySelector('html');
       html.style.fontSize = document.documentElement.clientWidth / 160 + 'px';
-    }
-    let html = document.querySelector('html');
-    html.style.fontSize = document.documentElement.clientWidth / 160 + 'px';
+    })()
   }
 }
 </script>
@@ -43,4 +46,11 @@ export default {
     height: 100%;
     z-index: 100;
   }
+.fade-enter-active, .fade-leave-active {
+  position: absolute;
+  transition: opacity .2s;
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
 </style>

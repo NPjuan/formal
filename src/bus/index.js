@@ -3,7 +3,7 @@ export default new Vue({
   data() {
     return {
       user: {
-        id: 0,
+        id: -1,
         name: '',
         score: 0
       }
@@ -22,7 +22,7 @@ export default new Vue({
     },
     reset() {
       this.user = {
-        id: 0,
+        id: -1,
         name: '',
         score: 0
       }

@@ -1,11 +1,11 @@
 <template>
   <div :class="classes">
+    <clock
+            @timeout="preTimeout"
+            class="pre-time">
+    </clock>
     <transition name="fade" mode="out-in">
       <div v-if="menuSize" style="position: relative;width: 100%;height: 100%" key="small">
-        <clock
-          @timeout="preTimeout"
-          class="pre-time">
-        </clock>
         <p  class="left-title">{{message}}</p>
         <!--底部确认按钮-->
         <div style="height: 18%;margin-top: 13%;text-align: center;display: flex;justify-content: space-around">
@@ -16,7 +16,7 @@
       <div v-else style="position: relative; width: 85%;margin: auto;height: 100%" key="big">
         <div class="top">
           <p style="float: right">您的羊城通余额<span class="yct-num">{{balance}}</span></p>
-          <p>您的羊城通卡号<span class="yct-num">{{account}}</span></p>
+          <p>您的羊城通卡号<span class="yct-num">{{cardNumber}}</span></p>
         </div>
         <div class="center"><span>您的充值账号余额为</span><span class="balance">50</span>元</div>
         <div class="bottom">
@@ -38,7 +38,7 @@
         menuSize: true,       // 背景选择，true 为小框
         message: '请放入要充值的羊城通卡', // tips
         invest: false,        // 是否进入充值页面
-        account: '123456789', // yct 账号
+        cardNumber: '123456789', // yct 账号
         balance: 278.90       // yct 余额
       }
     },
@@ -51,7 +51,7 @@
         this.menuSize = false
         if (this.invest) {
           // 如果是充值
-          // code
+          // ToDo
         } else {
           // 判断是否放入 yct
         }
@@ -72,6 +72,14 @@
           true,
           `当前充值${num}元`
         ]
+      },
+      /**
+       *
+       * 定时器倒计时完毕执行函数
+       * 返回上一级路由
+       */
+      timeout(){
+        this.$router.go(-1)
       }
     },
     computed: {
@@ -82,11 +90,38 @@
           after: !this.menuSize
         }
       }
+    },
+    mounted() {
+      const id = this.$bus.get('id')
+      if (id <= 0) {
+        console.log('id', id)
+        return
+      }
+      this.$axios.post('/card/bindCard.do', {
+        "user_id": `${id}`,
+        "user_type":"2",
+        "card_number":"987654321"
+      })
+      .then(res => {
+        console.log(!res.data.code)
+        if (res.data.code) {
+          let cardNumber = res.data.data.cardNumber
+          this.cardNumber = cardNumber
+        }
+      })
+      .catch(err => {
+        console.log(err)
+      })
     }
   }
 </script>
 
 <style scoped>
+  .time{
+    position: absolute;
+    left: 10%;
+    top: 10%;
+  }
 .main{
   position: absolute;
   left: 50%;

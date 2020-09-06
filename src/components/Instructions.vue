@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="position: relative;width: 100%;height: 100%" @click.self="timeout">
       <clock @timeout="timeout" class="clock" :count="180"></clock>
     </div>
 </template>

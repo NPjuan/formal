@@ -5,7 +5,9 @@ import App from './App'
 import router from './router'
 // 全局注册组件
 import clock from './components/clock'
+import popUp from './components/pop'
 Vue.component('clock',clock)
+Vue.component('popUp',popUp)
 // 默认请求地址
 import axios from 'axios'
 Vue.prototype.$axios = axios

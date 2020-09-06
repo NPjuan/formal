@@ -1,8 +1,7 @@
 <template>
-  <div style="position: relative;width: 100%;height: 100%" @click="onFocus">
+  <div style="position: relative;width: 100%;height: 100%" @click.self="timeout">
+    <camera :key="timeStamp" class="camera" @handleVideo="handleVideo" v-if="showVideo" :complete="videoComplete"></camera>
     <div :class="classes">
-      <!--获取条形码-->
-      <input type="text" ref="ipt" @input="barCode" maxlength="13" style="position: absolute;left:0;top:0;opacity: 0;z-index: -5">
       <transition name="fade" mode="out-in">
         <!--使用大框-->
         <div v-if="menuSize" style="position: relative;width: 100%;height: 100%" key="big">
@@ -18,18 +17,24 @@
           <!--底部确认按钮-->
           <div v-if="!finish" style="height: 12.5%;margin: 6% auto;text-align: center"><span class="btn" @click="complete">完成回收</span></div>
           <div v-else class="bottom-container">
+            <!--礼物选择-->
             <div class="gifts-container">
               <div class="gift-border" v-for="(item, index) in gifts" @click="pick(index)">
                 <div class="gift">
-                  <img :src="item.src" alt="gift">
+                  <img :src="item.picturePath" alt="gift">
                 </div>
-                <p class="gift-des">{{item.des}}</p>
+                <p class="gift-des">{{item.name}}</p>
               </div>
             </div>
+            <!--扫描二维码获取更多离谱-->
             <div class="wx-code">
-              <img src="../assets/resource/wx.png" alt="wx">
+              <img src="../assets/resource/littleProgram.jpg" alt="wx">
               <p>微信扫码兑换更多礼品</p>
             </div>
+            <!--提示礼物选择框可以滑动-->
+            <p class="gifts-shining">
+              向右滑动可查看更多
+            </p>
           </div>
         </div>
         <!--使用小框-->
@@ -44,34 +49,57 @@
           </div>
         </div>
       </transition>
+      <!--  隐藏的 video 以扫描得出瓶子图片传输给后台    -->
     </div>
   </div>
 </template>
 
 <script>
+  import camera from "./camera"
   export default {
     name: "Bottle",
+    components: {
+      camera
+    },
     data() {
       return {
-        menuSize: true,  // true 为大尺寸
-        plasticBottles: 2,  // 塑料瓶
-        cans: 0,            // 易拉罐
-        others: 5,          // 其他瓶子
+        showVideo: true,
+        menuSize: true,     // true 为大尺寸
         finish: false,      // 是否完成投递
+        plasticBottles: 0,  // 塑料瓶
+        cans: 0,            // 易拉罐
+        others: 0,          // 其他瓶子
         gifts: [            //  礼物信息
           {
             des: '环保袋',
-            src: require('../assets/resource/pack.png')
+            picturePath: require('../assets/resource/pack.png'),
           },
           {
             des: '超市购物券',
-            src: require('../assets/resource/qian3.svg')
+            picturePath: require('../assets/resource/qian3.svg'),
           },
         ],
-        company: ''
+        company: '',  // 判断投递的种类
+        videoResults: [],
+        videoComplete: false,
+        timeStamp: 0
       }
     },
     methods: {
+      handleVideo(results) {
+        console.log('处理video')
+        // this.showVideo = false
+        this.videoComplete = true
+        this.menuSize = false // 小屏幕
+        // 这里延迟 250 是等待动画结束才能获取 dom e元素
+        setTimeout(()=>{
+          this.$refs.Des.innerHTML = `当前回收的是${results[0].name}`
+          this.company = '瓶'
+        },500)
+        // setTimeout(()=>{
+        //   this.$refs.Des.innerHTML = `未能识别瓶子`
+        // },250)
+      },
       timeout() {
         this.$router.go(-1)
       },
@@ -83,22 +111,36 @@
         // 选中礼物
         this.menuSize = false
         setTimeout(()=>{
-          this.$refs.Des.innerHTML = `选择的礼物是${this.gifts[index]['des']}`
+          this.$refs.Des.innerHTML = `选择的礼物是${this.gifts[index]['name']}`
         }, 250)
       },
       confirm() {
         // 确认
-       this.menuSize = true
         if (this.company !== '') {
           // 如果存在种类，代表是投递瓶子状态
-          console.log(this.company)
+          // 累计积分
           switch (this.company) {
-            case '瓶': this.plasticBottles++;break
-            case '罐': this.cans++;break
+            case '瓶':
+              this.plasticBottles++
+              this.$bus.get('id') !== -1 && this.$axios.post('/face/loginByFace.do', {
+                id: this.$bus.get('id'),
+                score: 3
+              })
+              break
+            case '罐':
+              this.cans++
+              this.$bus.get('id') !== -1 && this.$axios.post('/face/loginByFace.do', {
+                id: this.$bus.get('id'),
+                score: 3
+              })
+              break
             default: this.others++
           }
+          this.timeStamp = new Date().getTime()
           this.company = ''
         }
+        // 累计积分
+        this.menuSize = true
       },
       cancel() {
         // 取消
@@ -110,44 +152,21 @@
         this.finish = true
       },
       barCode () {
-        let ipt = this.$refs.ipt
-        if (ipt.value.length === 13) {
-          let code = ipt.value
-          // 赋值为空 便于重新赋值
-          ipt.value = ''
-          this.$axios.post('/bottle/queryByNumber.do', {
-            number: code
-          })
-            .then((res)=>{
-              console.log(res)
-             // 如果接收不到数据
-              if (res.data.code === '1') {
-                throw error('无法识别瓶子')
-              }
-              this.menuSize = false // 小屏幕
-              return res.data.data
-            })
-            .then((mes)=>{
-              // 这里延迟 250 是等待动画结束才能获取 dom 元素
-              setTimeout(()=>{
-                this.$refs.Des.innerHTML = `当前回收的是${mes[0]['name']}`
-                this.company = mes[0]['company']
-              },250)
-            })
-            .catch((err)=>{
-              console.log(err); // 这里需要加分号，否则语法分析报错
-              [this.menuSize, this.botDes] = [
-                false,
-                `当前回收物品未能识别`
-              ]
-            })
-        }
       },
       onFocus() {
-      console.log('aaaa')
       // 无论点击那里，最后都聚焦到 input
       this.$refs.ipt.focus()
-    }
+      },
+      queryGifts() {
+        this.$axios.post('/gift/getGiftList.do')
+          .then(res => {
+            console.log(res)
+            this.gifts =res.data.data
+          })
+          .catch(err => {
+            console.log(err)
+          })
+      }
     },
     computed: {
       message() {
@@ -175,17 +194,22 @@
       }
     },
     mounted() {
-      this.onFocus()
+      this.queryGifts()
     }
   }
 </script>
 
 <style scoped>
+  .camera{
+    position: fixed;
+    left: 0;
+    top: 0;
+  }
   .main{
     position: absolute;
     left: 50%;
     top: 50%;
-    transition: .3s all ease-in-out;
+    transition: .25s all ease-in-out;
     transform: translate(-50%, -50%);
     background-image: url("../assets/resource/exchange.png");
     background-repeat: no-repeat;
@@ -209,11 +233,12 @@
   }
   .left-title{
     box-sizing: border-box;
-    letter-spacing: .5rem;
-    font-size: 2.5rem;
-    text-align: center;
-    padding-top: 12.5%;
-    padding-left: 10rem;
+    letter-spacing: .25rem;
+    font-size: 2.2rem;
+    text-align: left;
+    padding-top: 8%;
+    padding-left: 14rem;
+    padding-right: 4rem;
     color: rgb(0,245, 255);
   }
   .point{
@@ -255,23 +280,32 @@
   .bottom-container{
     display: flex;
     justify-content: space-between;
-    margin-top: 4rem;
+    margin-top: 2rem;
     height: 45%;
   }
   .gifts-container{
+    position: relative;
     display: flex;
     justify-content: space-between;
+    flex-wrap: nowrap;
     height: 100%;
     width: 50%;
     margin-left: 10%;
+    overflow: auto;
   }
   .gift-border{
+    display: inline-flex;
+    flex-direction: column;
+    flex: 0 0 15rem;
     position: relative;
     box-sizing: border-box;
     border-radius: 50%;
     border: .3rem solid rgba(0, 119, 137, 0.431);
     width: 15rem;
     height: 15rem;
+  }
+  .gift-border + .gift-border{
+    margin-left: 9rem;
   }
   .gift{
     position: absolute;
@@ -285,14 +319,29 @@
     transform: translate(-50%, -50%);
   }
   .gift-des{
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -4.5rem;
-    text-align: center;
-    font-size: 2rem;
+    height: 2rem;
+    margin-top: 16rem;
+    text-align: left;
+    font-size: 1.2rem;
     letter-spacing: .3rem;
     color: rgb(0,245, 255);
+  }
+  .gifts-shining{
+    position: absolute;
+    left: 10%;
+    bottom: 10%;
+    font-size: 1rem;
+    color: rgb(0,245, 255);
+  }
+  @media screen and (max-width: 1601px) {
+    .gift-border{
+      flex: 0 0 12rem;
+      width: 12rem;
+      height: 12rem;
+    }
+    .gift-des{
+      margin-top: 12rem;
+    }
   }
   .wx-code{
     position: relative;
@@ -307,7 +356,7 @@
     width: 13rem;
   }
   .wx-code p{
-    margin-top: 2.4rem;
+    margin-top: 2.3rem;
     font-size: 2rem;
     letter-spacing: .3rem;
     color: rgb(0,245, 255);

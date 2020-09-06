@@ -1,7 +1,7 @@
 <template>
-  <div class="main">
-      <!--中间框-->
-      <div id="center">
+  <div class="main" @click.self="back">
+    <!--中间框-->
+    <div id="center">
         <transition name="fade">
           <!--操作选框-->
           <div class="center-show">
@@ -13,10 +13,13 @@
       </div>
     <!--侧边栏-->
     <div id="side">
-      <img v-if="!$bus.get('id')" src="../assets/resource/brushFaceLogin.png" alt="brushFace" @click="brushFace">
+      <img v-if="$bus.get('id') === -1" src="../assets/resource/brushFaceLogin.png" alt="brushFace" @click="brushFace">
       <img src="../assets/resource/yct.png" alt="yct" @click="yct">
       <img src="../assets/resource/Instructions.png" alt="instructions" @click="instruction">
     </div>
+    <pop-up ref="popUp">
+      请先登录哦
+    </pop-up>
   </div>
 </template>
 
@@ -32,6 +35,13 @@
     },
     methods: {
       bottle() {
+        // if (this.$bus.get('id') <= 0) {
+        //   // 提示先登录
+        //   this.$refs.popUp.popUp()
+        // } else {
+        //   this.$router.push('/bottle')
+        // }
+        // 不经过刷脸登录也可以回收瓶子
         this.$router.push('/bottle')
       },
       brushFace() {
@@ -42,6 +52,9 @@
       },
       instruction() {
         this.$router.push('/instructions')
+      },
+      back() {
+        this.$router.go(-1)
       }
     },
     mounted() {
@@ -50,14 +63,15 @@
         if (time) {
           time--
         } else {
-          clearInterval(this.timer)
+          // 重置用户幸喜
+          this.$bus.reset()
+
+          // 回到广告位
           this.$router.push('/')
         }
       }, 1000)
     },
     beforeDestroy() {
-      // 重置个人信息
-      this.$bus.reset()
       clearInterval(this.timer)
     }
   }
