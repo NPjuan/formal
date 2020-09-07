@@ -29,10 +29,14 @@
         this.isHttp = true
         this.$axios.get('http://192.168.1.109:8080/BottleProject/user/inventory')
         .then(res => {
-          let { data: money } = res.data
-          money = this.hex2bin(money)
+          let { data: money, msg, code } = res.data
           console.log('res', res)
-          this.success(money)
+          if (code !== '500000') {
+            this.fail(msg)
+            return
+          }
+          money = this.hex2bin(money)
+          this.success(msg, money)
         })
         .catch(err => {
           console.log('err', err)
@@ -40,11 +44,11 @@
         })
         .finally(this.clear)
       },
-      success(money) {
-        this.message = `圈存成功，余额为 ${money} 元`
+      success(msg, money) {
+        this.message = `${msg}，余额为 ${money} 元`
       },
-      fail() {
-        this.message = '圈存失败'
+      fail(msg) {
+        this.message = msg
       },
       clear() {
         this.isHttp = false
