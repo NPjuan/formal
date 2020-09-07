@@ -16,6 +16,7 @@
       <img v-if="$bus.get('id') === -1" src="../assets/resource/brushFaceLogin.png" alt="brushFace" @click="brushFace">
       <img src="../assets/resource/yct.png" alt="yct" @click="yct">
       <img src="../assets/resource/Instructions.png" alt="instructions" @click="instruction">
+      <img src="../assets/resource/yct.png" alt="Inventory" @click="inventory">
     </div>
     <pop-up ref="popUp">
       请先登录哦
@@ -52,6 +53,9 @@
       },
       instruction() {
         this.$router.push('/instructions')
+      },
+      inventory() {
+        this.$router.push('/inventory')
       },
       back() {
         this.$router.go(-1)

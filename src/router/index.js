@@ -8,6 +8,7 @@ import Bottle from '../components/Bottle'
 import Instructions from '../components/Instructions'
 import BrushFace from '../components/BrushFace'
 import YCT from '../components/YCT'
+ import inventory from "../components/inventory"
 
 export default new Router({
   routes: [
@@ -40,6 +41,11 @@ export default new Router({
       name: 'YCT',
       path: '/yct',
       component: YCT
+    },
+    {
+      name: 'inventory',
+      path: '/inventory',
+      component: inventory
     }
   ]
 })
