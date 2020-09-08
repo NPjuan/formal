@@ -40,14 +40,14 @@
         })
         .catch(err => {
           console.log('err', err)
-          this.fail()
+          this.fail('连接超时')
         })
         .finally(this.clear)
       },
       success(msg, money) {
         this.message = `${msg}，余额为 ${money} 元`
       },
-      fail(msg) {
+      fail(msg = '服务器繁忙') {
         this.message = msg
       },
       clear() {
