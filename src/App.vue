@@ -7,6 +7,7 @@
 </template>
 
 <script>
+  import { getVideosId } from './utils/handleVideo.js'
 export default {
   name: 'App',
   data() {

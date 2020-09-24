@@ -1,6 +1,13 @@
 <template>
   <div style="position: relative;width: 100%;height: 100%" @click.self="timeout">
-    <camera :key="timeStamp" class="camera" @handleVideo="handleVideo" v-if="showVideo" :complete="videoComplete"></camera>
+    <camera
+            ref="camera"
+            :key="timeStamp"
+            :facing-mode="{ exact: 'environment' }"
+            class="camera"
+            @handleVideo="handleVideo"
+            v-if="showVideo"
+            :complete="videoComplete"></camera>
     <div :class="classes">
       <transition name="fade" mode="out-in">
         <!--使用大框-->
@@ -15,26 +22,29 @@
             <div class="option"><span class="option-des">其他:&emsp;</span><span class="option-num">{{others}}</span></div>
           </div>
           <!--底部确认按钮-->
-          <div v-if="!finish" style="height: 12.5%;margin: 6% auto;text-align: center"><span class="btn" @click="complete">完成回收</span></div>
+          <div v-if="!finish" style="height: 12.5%;margin: 6% auto;text-align: center">
+            <span class="btn" @click="complete">完成回收</span>
+          </div>
           <div v-else class="bottom-container">
-            <!--礼物选择-->
-            <div class="gifts-container">
-              <div class="gift-border" v-for="(item, index) in gifts" @click="pick(index)">
-                <div class="gift">
-                  <img :src="item.picturePath" alt="gift">
-                </div>
-                <p class="gift-des">{{item.name}}</p>
-              </div>
-            </div>
-            <!--扫描二维码获取更多离谱-->
-            <div class="wx-code">
-              <img src="../assets/resource/littleProgram.jpg" alt="wx">
-              <p>微信扫码兑换更多礼品</p>
-            </div>
-            <!--提示礼物选择框可以滑动-->
-            <p class="gifts-shining">
-              向右滑动可查看更多
-            </p>
+            <exchangeGifts></exchangeGifts>
+<!--            &lt;!&ndash;礼物选择&ndash;&gt;-->
+<!--            <div class="gifts-container">-->
+<!--              <div class="gift-border" v-for="(item, index) in gifts" @click="pick(index)">-->
+<!--                <div class="gift">-->
+<!--                  <img :src="item.picturePath" alt="gift">-->
+<!--                </div>-->
+<!--                <p class="gift-des">{{item.name}}</p>-->
+<!--              </div>-->
+<!--            </div>-->
+<!--            &lt;!&ndash;扫描二维码获取更多礼品&ndash;&gt;-->
+<!--            <div class="wx-code">-->
+<!--              <img src="../assets/resource/littleProgram.jpg" alt="wx">-->
+<!--              <p>微信扫码兑换更多礼品</p>-->
+<!--            </div>-->
+<!--            &lt;!&ndash;提示礼物选择框可以滑动&ndash;&gt;-->
+<!--            <p class="gifts-shining">-->
+<!--              向右滑动可查看更多-->
+<!--            </p>-->
           </div>
         </div>
         <!--使用小框-->
@@ -56,10 +66,13 @@
 
 <script>
   import camera from "./camera"
+  import exchangeGifts from "./exchangeGifts/exchangeGifts"
+  import { getVideosId } from '../utils/handleVideo'
   export default {
     name: "Bottle",
     components: {
-      camera
+      camera,
+      exchangeGifts
     },
     data() {
       return {
@@ -149,13 +162,14 @@
       },
       complete() {
         // 完成
-        this.finish = true
+        // this.finish = true
+        this.$router.push('/exchangeGifts')
       },
       barCode () {
       },
       onFocus() {
       // 无论点击那里，最后都聚焦到 input
-      this.$refs.ipt.focus()
+        this.$refs.ipt.focus()
       },
       queryGifts() {
         this.$axios.post('/gift/getGiftList.do')
@@ -190,11 +204,14 @@
         }
       },
       point() {
-        return (this.plasticBottles + this.cans)*3
+        return (this.plasticBottles + this.cans)*5
       }
     },
     mounted() {
       this.queryGifts()
+    },
+    beforeDestroy() {
+      this.$refs.carema.$destroy()
     }
   }
 </script>

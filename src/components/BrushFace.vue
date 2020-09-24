@@ -71,7 +71,9 @@
       let video = this.$refs.video;
       // facingMode: "user" 优先选择
       let constraints = {
-        video: {width: 500, height: 500, facingMode: "user"},
+        video: {
+          facingMode: 'user'
+        },
         audio: false
       };
       let promise = navigator.mediaDevices.getUserMedia(constraints);

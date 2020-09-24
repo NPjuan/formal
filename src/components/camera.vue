@@ -13,6 +13,10 @@
       videoComplete: {
         type: Boolean,
         default: false
+      },
+      facingMode: {
+        type: [String, Object],
+        default: "user"
       }
     },
     data() {
@@ -20,6 +24,7 @@
         recording: true,
         mediaStreamTrack: null,
         timer: null,
+        httpCount: 0
       }
     },
     methods: {
@@ -28,7 +33,10 @@
         let canvas = this.$refs.canvas
         let video = this.$refs.video
         this.timer = setInterval(()=>{
-          console.log('启动')
+          if (++this.httpCount >= 5) {
+            this.endVideo()
+          }
+          console.log('发送照片')
           canvas.getContext("2d").drawImage(video, 0, 0, 400, 400);
           let ext = video.src.substring(video.src.lastIndexOf(".")+1).toLowerCase();
           let base64 = canvas.toDataURL("image/"+ext).replace('data:image/png;base64,', '')
@@ -46,7 +54,7 @@
               console.log('请求成功')
               this.recording = false
               this.$emit('handleVideo', res.data.results)
-              this.endVedio()
+              this.endVideo()
             }
           })
           .catch(err => {
@@ -73,7 +81,7 @@
           console.log('err', err)
         })
       },
-      endVedio() {
+      endVideo() {
         this.mediaStreamTrack && this.mediaStreamTrack.stop();
         clearInterval(this.timer)
         console.log('摄像头已关闭')
@@ -82,18 +90,16 @@
         // 打开摄像头
         let video = this.$refs.video;
         let constraints = {
-          video: {width: 500, height: 500},
+          video: this.facingMode,
           audio: false
         };
 
         let promise = navigator.mediaDevices.getUserMedia(constraints)
           .then( MediaStream => {
             console.dir(MediaStream)
-            console.dir(MediaStream.getTracks()[1])
             this.mediaStreamTrack = typeof MediaStream.stop === 'function' ? MediaStream : MediaStream.getTracks()[0];
             video.srcObject = MediaStream;
             video.play();
-            console.log('开始')
             this.drawPic()
           })
           .catch( PermissionDeniedError => {
@@ -113,7 +119,7 @@
       }
     },
     beforeDestroy() {
-      this.endVedio()
+      this.endVideo()
     }
   }
 </script>

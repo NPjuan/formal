@@ -1,7 +1,7 @@
 <template>
   <div id="clock" @click="reset">
     <p style="font-size: 1.8rem"><span style="font-size: 2.7rem;">{{ time }}</span> s</p>
-    <p style="padding-top:5px;font-size: 1.2rem;letter-spacing: .3rem">后自动返回</p>
+    <p style="padding-top:5px;font-size: 1.2rem;letter-spacing: .3rem">后自动返回或点我返回</p>
   </div>
 </template>
 

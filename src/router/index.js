@@ -9,6 +9,7 @@ import Instructions from '../components/Instructions'
 import BrushFace from '../components/BrushFace'
 import YCT from '../components/YCT'
  import inventory from "../components/inventory"
+ import exchangeGifts from "../components/exchangeGifts/exchangeGifts"
 
 export default new Router({
   routes: [
@@ -46,6 +47,11 @@ export default new Router({
       name: 'inventory',
       path: '/inventory',
       component: inventory
+    },
+    {
+      name: 'exchangeGifts',
+      path: '/exchangeGifts',
+      component: exchangeGifts
     }
   ]
 })

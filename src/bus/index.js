@@ -5,7 +5,7 @@ export default new Vue({
       user: {
         id: -1,
         name: '',
-        score: 0
+        score: 1200
       }
     }
   },

@@ -27,7 +27,7 @@
           return
         }
         this.isHttp = true
-        this.$axios.get('http://192.168.1.109:8080/BottleProject/user/inventory')
+        this.$axios.get('http://127.0.0.1:8080/BottleProject/user/inventory')
         .then(res => {
           let { data: money, msg, code } = res.data
           console.log('res', res)
