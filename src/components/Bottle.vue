@@ -209,9 +209,6 @@
     },
     mounted() {
       this.queryGifts()
-    },
-    beforeDestroy() {
-      this.$refs.carema.$destroy()
     }
   }
 </script>

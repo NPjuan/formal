@@ -33,20 +33,24 @@
         let canvas = this.$refs.canvas
         let video = this.$refs.video
         this.timer = setInterval(()=>{
-          if (++this.httpCount >= 5) {
+          if (++this.httpCount >= 2) {
             this.endVideo()
+            return
           }
           console.log('发送照片')
           canvas.getContext("2d").drawImage(video, 0, 0, 400, 400);
           let ext = video.src.substring(video.src.lastIndexOf(".")+1).toLowerCase();
+          // let base640 = canvas.toDataURL("image/"+ext)
+          // console.log('base640', base640)
           let base64 = canvas.toDataURL("image/"+ext).replace('data:image/png;base64,', '')
-          this.sendPic(base64)
-        }, 3000)
+          this.sendPic(base640)
+        }, 5000)
       },
       // 发送数据
       sendPic(base64) {
-        this.$axios.post('https://aip.baidubce.com/rpc/2.0/ai_custom/v1/detection/bottletransione0730?access_token="24.ff2c6103b187bc3104ab94f2ffcc6b8a.2592000.1598759499.282335-21696965"', {
-          image: base640
+        // console.log('base64', base64)
+        this.$axios.post(`https://aip.baidubce.com/rpc/2.0/ai_custom/v1/detection/bottletransione0730?access_token="${this.$bus.access_token}"`, {
+          image: base64
         })
           .then(res => {
             console.log('res', res)
@@ -56,6 +60,10 @@
               this.$emit('handleVideo', res.data.results)
               this.endVideo()
             }
+            return this.$axios.get('http://localhost:8080/BottleProject/user/receiveBottle')
+          })
+          .then(value => {
+            console.log('value', value)
           })
           .catch(err => {
             console.log('err', err)
@@ -94,7 +102,7 @@
           audio: false
         };
 
-        let promise = navigator.mediaDevices.getUserMedia(constraints)
+        navigator.mediaDevices.getUserMedia(constraints)
           .then( MediaStream => {
             console.dir(MediaStream)
             this.mediaStreamTrack = typeof MediaStream.stop === 'function' ? MediaStream : MediaStream.getTracks()[0];

@@ -4,7 +4,8 @@
     <transition name="fade">
       <main v-if="!selected">
         <gift-item
-                v-for="item in gifts"
+                v-for="(item, index) in gifts"
+                :key="index"
                 :message="item"
                 @giftClick="handleGiftsClick(item)"
         ></gift-item>
@@ -68,6 +69,7 @@
         console.log('兑换成功')
         this.$bus.user.score = this.$bus.user.score - this.selectedValue.score
         this.toggleMessage()
+        this.giftRun()
       },
       cancel() {
         console.log('取消兑换')
@@ -75,11 +77,20 @@
       },
       toggleMessage() {
         this.selected = !this.selected
+      },
+      giftRun() {
+        this.$axios.get('http://localhost:8080/BottleProject/gift/run')
+          .then(value => {
+            console.log('value', value)
+          })
+          .catch(reason => {
+            console.log('reason', reason)
+          })
       }
     },
     created() {
       this.queryGifts()
-    }
+    },
   }
 </script>
 

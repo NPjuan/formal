@@ -6,7 +6,8 @@ export default new Vue({
         id: -1,
         name: '',
         score: 1200
-      }
+      },
+      access_token: "24.187cd210ebb5abca5bea830679b82b1b.2592000.1603517805.282335-21696965"
     }
   },
   methods: {
