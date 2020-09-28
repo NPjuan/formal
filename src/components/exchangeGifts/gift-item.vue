@@ -7,7 +7,7 @@
         </div>
       </div>
     </div>
-    <p class="tips">积分：{{message.score}}</p>
+    <p class="tips">{{subHead}}</p>
     <p>{{message.name}}</p>
   </div>
 </template>
@@ -24,12 +24,22 @@
           name: '暂无',
           picturePath: '',
           score: ''
-        }
+        },
+      },
+      isSoldOut: {
+        type: Boolean,
+        default: false
       }
     },
     methods: {
       handleClick() {
         this.$emit('giftClick', this.message)
+      }
+    },
+    computed: {
+      subHead(val, newVal) {
+        console.log('isSoldOut', this.isSoldOut)
+        return this.isSoldOut ? '礼物售罄' : `积分：${this.message.score}`
       }
     }
   }

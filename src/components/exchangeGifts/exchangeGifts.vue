@@ -7,7 +7,8 @@
                 v-for="(item, index) in gifts"
                 :key="index"
                 :message="item"
-                @giftClick="handleGiftsClick(item)"
+                :isSoldOut="!giftsCount[index]"
+                @giftClick="handleGiftsClick(item, index)"
         ></gift-item>
       </main>
       <div v-else class="message">
@@ -38,10 +39,15 @@
     },
     data() {
       return {
+        // 积分是否足够
         can: false,
+        // gift 礼物数组
         gifts: null,
         selected: false,
-        selectedValue: null
+        selectedIndex: 0,
+        selectedValue: null,
+        // 礼物数量
+        giftsCount: null
       }
     },
     methods: {
@@ -58,16 +64,18 @@
             console.log(err)
           })
       },
-      handleGiftsClick(item) {
+      handleGiftsClick(item, index) {
+        if (!giftsCount[index]) return
+        this.selectedIndex = index
         this.selectedValue = item
         let userScore = this.$bus.get('score')
-        console.log('user', userScore)
         this.can = userScore >= item.score
         this.toggleMessage()
       },
       confirm() {
         console.log('兑换成功')
         this.$bus.user.score = this.$bus.user.score - this.selectedValue.score
+        this.giftsCount[this.selectedIndex ]--
         this.toggleMessage()
         this.giftRun()
       },
@@ -78,7 +86,21 @@
       toggleMessage() {
         this.selected = !this.selected
       },
+      getGiftsStatus() {
+        this.$axios.get('http://192.168.1.102:8080/BottleProject/gift/giftStatus')
+          .then(({data}) => {
+            const result = []
+            for (let key in data.data) {
+              result.push(data.data[key])
+            }
+            this.giftsCount = result
+          })
+          .catch(reason => {
+            console.log('reason', reason)
+          })
+      },
       giftRun() {
+        if (!!this.giftsCount[index]) return
         this.$axios.get('http://localhost:8080/BottleProject/gift/run')
           .then(value => {
             console.log('value', value)
@@ -90,6 +112,7 @@
     },
     created() {
       this.queryGifts()
+      this.getGiftsStatus()
     },
   }
 </script>
@@ -114,6 +137,7 @@
    flex-wrap: wrap;
    justify-content: flex-start;
    width: 60rem;
+   min-height: 50rem;
    padding: 6rem;
    border-radius: 1rem;
    background-image: url("../../assets/resource/exchange.png");

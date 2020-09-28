@@ -10,10 +10,6 @@
   export default {
     name: "camera",
     props: {
-      videoComplete: {
-        type: Boolean,
-        default: false
-      },
       facingMode: {
         type: [String, Object],
         default: "user"
@@ -23,8 +19,7 @@
       return {
         recording: true,
         mediaStreamTrack: null,
-        timer: null,
-        httpCount: 0
+        timer: null
       }
     },
     methods: {
@@ -33,10 +28,6 @@
         let canvas = this.$refs.canvas
         let video = this.$refs.video
         this.timer = setInterval(()=>{
-          if (++this.httpCount >= 2) {
-            this.endVideo()
-            return
-          }
           console.log('发送照片')
           canvas.getContext("2d").drawImage(video, 0, 0, 400, 400);
           let ext = video.src.substring(video.src.lastIndexOf(".")+1).toLowerCase();
@@ -120,11 +111,6 @@
       this.dispatchVideo()
       // await this._getToken()
 
-    },
-    watch: {
-      videoComplete(val, newVal){
-        console.log('val', val)
-      }
     },
     beforeDestroy() {
       this.endVideo()

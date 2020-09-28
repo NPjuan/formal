@@ -1,5 +1,5 @@
 <template>
-  <div style="position: relative;width: 100%;height: 100%" @click.self="timeout">
+  <div style="position: relative;width: 100%;height: 100%">
     <camera
             ref="camera"
             :key="timeStamp"
@@ -7,7 +7,7 @@
             class="camera"
             @handleVideo="handleVideo"
             v-if="showVideo"
-            :complete="videoComplete"></camera>
+    ></camera>
     <div :class="classes">
       <transition name="fade" mode="out-in">
         <!--使用大框-->
@@ -48,8 +48,8 @@
           </div>
         </div>
         <!--使用小框-->
-        <div v-else style="position: relative;width: 100%;height: 100%" key="small">
-          <clock @timeout="timeout_a" class="clock" :count="60"></clock>
+        <div v-else-if="!waiting" style="position: relative;width: 100%;height: 100%" key="small">
+          <clock @timeout="changeMenuSize" class="clock" :count="60"></clock>
           <p class="left-title" ref="Des">请等待</p>
           <!--<p v-show="isPick" class="left-title" ref="giftDes">当前兑换礼品是{{giftDes}}</p>-->
           <!--底部确认按钮-->
@@ -58,8 +58,8 @@
             <span class="btn btn-small" @click="cancel">取消</span>
           </div>
         </div>
+        <div v-else></div>
       </transition>
-      <!--  隐藏的 video 以扫描得出瓶子图片传输给后台    -->
     </div>
   </div>
 </template>
@@ -82,31 +82,22 @@
         plasticBottles: 0,  // 塑料瓶
         cans: 0,            // 易拉罐
         others: 0,          // 其他瓶子
-        gifts: [            //  礼物信息
-          {
-            des: '环保袋',
-            picturePath: require('../assets/resource/pack.png'),
-          },
-          {
-            des: '超市购物券',
-            picturePath: require('../assets/resource/qian3.svg'),
-          },
-        ],
         company: '',  // 判断投递的种类
         videoResults: [],
-        videoComplete: false,
-        timeStamp: 0
+        timeStamp: 0,
+        // 每个瓶子所获得的积分
+        bottleValue: 100,
+        // 等待状态
+        waiting: false
       }
     },
     methods: {
       handleVideo(results) {
         console.log('处理video')
-        // this.showVideo = false
-        this.videoComplete = true
         this.menuSize = false // 小屏幕
         // 这里延迟 250 是等待动画结束才能获取 dom e元素
         setTimeout(()=>{
-          this.$refs.Des.innerHTML = `当前回收的是${results[0].name}`
+          this.$refs.Des.innerHTML = `当前回收的是塑料瓶`
           this.company = '瓶'
         },500)
         // setTimeout(()=>{
@@ -116,7 +107,7 @@
       timeout() {
         this.$router.go(-1)
       },
-      timeout_a() {
+      changeMenuSize() {
         // 自动回收
         this.menuSize = true
       },
@@ -128,6 +119,11 @@
         }, 250)
       },
       confirm() {
+        // Todo 等待机器执行操作完毕
+        // 切换动画
+
+
+
         // 确认
         if (this.company !== '') {
           // 如果存在种类，代表是投递瓶子状态
@@ -135,17 +131,11 @@
           switch (this.company) {
             case '瓶':
               this.plasticBottles++
-              this.$bus.get('id') !== -1 && this.$axios.post('/face/loginByFace.do', {
-                id: this.$bus.get('id'),
-                score: 3
-              })
+              this.addScore()
               break
             case '罐':
               this.cans++
-              this.$bus.get('id') !== -1 && this.$axios.post('/face/loginByFace.do', {
-                id: this.$bus.get('id'),
-                score: 3
-              })
+              this.addScore()
               break
             default: this.others++
           }
@@ -165,29 +155,20 @@
         // this.finish = true
         this.$router.push('/exchangeGifts')
       },
-      barCode () {
+      addScore() {
+        this.$bus.get('id') !== -1 && this.$axios.post('/face/loginByFace.do', {
+          id: this.$bus.get('id'),
+          score: this.bottleValue
+        })
+        this.$bus.user.score += this.bottleValue
       },
-      onFocus() {
-      // 无论点击那里，最后都聚焦到 input
-        this.$refs.ipt.focus()
-      },
-      queryGifts() {
-        this.$axios.post('/gift/getGiftList.do')
-          .then(res => {
-            console.log(res)
-            this.gifts =res.data.data
-          })
-          .catch(err => {
-            console.log(err)
-          })
-      }
     },
     computed: {
       message() {
         if (!this.finish) {
           return {
             title: '请放入可回收塑料瓶',
-            subHead: `当前积分：${this.point}`
+            subHead: `当前积分：${this.$bus.user.score}`
           }
         } else {
           return {
@@ -204,11 +185,8 @@
         }
       },
       point() {
-        return (this.plasticBottles + this.cans)*5
+        return (this.plasticBottles + this.cans) * this.bottleValue
       }
-    },
-    mounted() {
-      this.queryGifts()
     }
   }
 </script>
@@ -223,7 +201,7 @@
     position: absolute;
     left: 50%;
     top: 50%;
-    transition: .25s all ease-in-out;
+    transition: .4s all ease-in-out;
     transform: translate(-50%, -50%);
     background-image: url("../assets/resource/exchange.png");
     background-repeat: no-repeat;
