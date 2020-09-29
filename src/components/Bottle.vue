@@ -6,12 +6,12 @@
             :facing-mode="{ exact: 'environment' }"
             class="camera"
             @handleVideo="handleVideo"
-            v-if="showVideo"
+            v-if="showVideo && menuSize"
     ></camera>
     <div :class="classes">
       <transition name="fade" mode="out-in">
         <!--使用大框-->
-        <div v-if="menuSize" style="position: relative;width: 100%;height: 100%" key="big">
+        <div v-if="menuSize" style="position: relative; height: 100%" key="big">
           <clock @timeout="timeout" class="clock" :count="180"></clock>
           <p class="title">{{message.title}}</p>
           <p class="point">{{message.subHead}}</p>
@@ -48,17 +48,21 @@
           </div>
         </div>
         <!--使用小框-->
-        <div v-else-if="!waiting" style="position: relative;width: 100%;height: 100%" key="small">
-          <clock @timeout="changeMenuSize" class="clock" :count="60"></clock>
-          <p class="left-title" ref="Des">请等待</p>
-          <!--<p v-show="isPick" class="left-title" ref="giftDes">当前兑换礼品是{{giftDes}}</p>-->
-          <!--底部确认按钮-->
-          <div style="height: 18%;margin-top: 13%;text-align: center;display: flex;justify-content: space-around">
-            <span class="btn btn-small" @click="confirm">确认</span>
-            <span class="btn btn-small" @click="cancel">取消</span>
+        <div v-else style="position: relative; height: 100%" key="small">
+          <div v-if="!waiting" style="height: 100%">
+            <clock @timeout="changeMenuSize" class="clock" :count="60"></clock>
+            <p class="left-title" ref="Des">请等待</p>
+            <!--<p v-show="isPick" class="left-title" ref="giftDes">当前兑换礼品是{{giftDes}}</p>-->
+            <!--底部确认按钮-->
+            <div style="height: 18%;margin-top: 16%;text-align: center;display: flex;justify-content: space-around">
+              <span class="btn btn-small" @click="confirm">确认</span>
+              <span class="btn btn-small" @click="cancel">取消</span>
+            </div>
+          </div>
+          <div v-else style="height: 100%">
+            <waiting></waiting>
           </div>
         </div>
-        <div v-else></div>
       </transition>
     </div>
   </div>
@@ -66,13 +70,15 @@
 
 <script>
   import camera from "./camera"
+  import waiting from "./waiting"
   import exchangeGifts from "./exchangeGifts/exchangeGifts"
   import { getVideosId } from '../utils/handleVideo'
   export default {
     name: "Bottle",
     components: {
       camera,
-      exchangeGifts
+      exchangeGifts,
+      waiting
     },
     data() {
       return {
@@ -121,10 +127,12 @@
       confirm() {
         // Todo 等待机器执行操作完毕
         // 切换动画
-
-
-
-        // 确认
+        this.waiting = true
+        // 调度机器接受瓶子
+        this.$axios.get('http://192.168.1.102:8080/BottleProject/user/receiveBottle')
+          .then(value => {
+            console.log('receiveBottle', value)
+          })
         if (this.company !== '') {
           // 如果存在种类，代表是投递瓶子状态
           // 累计积分
@@ -143,7 +151,6 @@
           this.company = ''
         }
         // 累计积分
-        this.menuSize = true
       },
       cancel() {
         // 取消
@@ -161,6 +168,10 @@
           score: this.bottleValue
         })
         this.$bus.user.score += this.bottleValue
+        setTimeout(() => {
+          this.waiting = false
+          this.menuSize = true
+        }, 5000)
       },
     },
     computed: {
@@ -226,7 +237,7 @@
   .left-title{
     box-sizing: border-box;
     letter-spacing: .25rem;
-    font-size: 2.2rem;
+    font-size: 2.5rem;
     text-align: left;
     padding-top: 8%;
     padding-left: 14rem;

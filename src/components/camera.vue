@@ -35,7 +35,7 @@
           // console.log('base640', base640)
           let base64 = canvas.toDataURL("image/"+ext).replace('data:image/png;base64,', '')
           this.sendPic(base640)
-        }, 5000)
+        }, 16000)
       },
       // 发送数据
       sendPic(base64) {
@@ -51,7 +51,6 @@
               this.$emit('handleVideo', res.data.results)
               this.endVideo()
             }
-            return this.$axios.get('http://localhost:8080/BottleProject/user/receiveBottle')
           })
           .then(value => {
             console.log('value', value)
@@ -109,8 +108,6 @@
     async mounted() {
       this.recoding = true
       this.dispatchVideo()
-      // await this._getToken()
-
     },
     beforeDestroy() {
       this.endVideo()

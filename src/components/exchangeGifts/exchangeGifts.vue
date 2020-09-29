@@ -65,7 +65,7 @@
           })
       },
       handleGiftsClick(item, index) {
-        if (!giftsCount[index]) return
+        if (!this.giftsCount[index]) return
         this.selectedIndex = index
         this.selectedValue = item
         let userScore = this.$bus.get('score')
@@ -87,6 +87,7 @@
         this.selected = !this.selected
       },
       getGiftsStatus() {
+        console.log('aaa')
         this.$axios.get('http://192.168.1.102:8080/BottleProject/gift/giftStatus')
           .then(({data}) => {
             const result = []
@@ -100,8 +101,10 @@
           })
       },
       giftRun() {
-        if (!!this.giftsCount[index]) return
-        this.$axios.get('http://localhost:8080/BottleProject/gift/run')
+        const index = this.selectedIndex
+        if (!this.giftsCount[index]) return
+        console.log('ok?')
+        this.$axios.get(`http://192.168.1.102:8080/BottleProject/gift/run/${index}`)
           .then(value => {
             console.log('value', value)
           })
