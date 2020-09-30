@@ -1,5 +1,5 @@
 <template>
-  <div id="app" @click.self="back">
+  <div id="app">
     <transition name="fade">
       <router-view></router-view>
     </transition>
@@ -8,7 +8,7 @@
 
 <script>
   import { getVideosId } from './utils/handleVideo.js'
-export default {
+  export default {
   name: 'App',
   data() {
     return {

@@ -3,9 +3,9 @@ export default new Vue({
   data() {
     return {
       user: {
-        id: -1,
-        name: '',
-        score: 1200
+        id: 1,
+        name: 'juan',
+        score: 2500
       },
       access_token: "24.187cd210ebb5abca5bea830679b82b1b.2592000.1603517805.282335-21696965"
     }
