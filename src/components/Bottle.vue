@@ -129,6 +129,13 @@
       },
       confirm() {
         // 确认
+        this.$axios.get('http://localhost:8080/BottleProject/user/receiveBottle')
+          .then(value => {
+
+          })
+          .catch(reason => {
+
+          })
         if (this.company !== '') {
           // 如果存在种类，代表是投递瓶子状态
           // 累计积分

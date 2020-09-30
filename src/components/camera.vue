@@ -60,7 +60,6 @@
               this.$emit('handleVideo', res.data.results)
               this.endVideo()
             }
-            return this.$axios.get('http://localhost:8080/BottleProject/user/receiveBottle')
           })
           .then(value => {
             console.log('value', value)
