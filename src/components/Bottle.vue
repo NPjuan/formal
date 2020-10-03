@@ -129,7 +129,7 @@
         // 切换动画
         this.waiting = true
         // 调度机器接受瓶子
-        this.$axios.get('http://192.168.1.102:8080/BottleProject/user/receiveBottle')
+        this.$axios.get('http://127.0.0.1:8080/BottleProject/user/receiveBottle')
           .then(value => {
             console.log('receiveBottle', value)
           })
@@ -171,7 +171,7 @@
         setTimeout(() => {
           this.waiting = false
           this.menuSize = true
-        }, 5000)
+        }, 16000)
       },
     },
     computed: {

@@ -34,8 +34,8 @@
           // let base640 = canvas.toDataURL("image/"+ext)
           // console.log('base640', base640)
           let base64 = canvas.toDataURL("image/"+ext).replace('data:image/png;base64,', '')
-          this.sendPic(base640)
-        }, 16000)
+          this.sendPic(base64)
+        }, 6000)
       },
       // 发送数据
       sendPic(base64) {
