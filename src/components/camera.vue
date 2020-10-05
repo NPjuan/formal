@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="camera">
     <video v-show="recording" ref="video" width="400px" height="400px" />
     <canvas v-show="!recording" ref="canvas" width="400px" height="400px"></canvas>
   </div>
@@ -31,15 +31,16 @@
           console.log('发送照片')
           canvas.getContext("2d").drawImage(video, 0, 0, 400, 400);
           let ext = video.src.substring(video.src.lastIndexOf(".")+1).toLowerCase();
-          // let base640 = canvas.toDataURL("image/"+ext)
-          // console.log('base640', base640)
-          let base64 = canvas.toDataURL("image/"+ext).replace('data:image/png;base64,', '')
-          this.sendPic(base64)
-        }, 6000)
+          let image = canvas.toDataURL("image/"+ext)
+          let imgEl = new Image()
+          imgEl.src = image
+          // this.downloadImage(imgEl, 'img')
+          let base64 = image.replace('data:image/png;base64,', '')
+          this.sendPic(base640)
+        }, 16000)
       },
       // 发送数据
       sendPic(base64) {
-        // console.log('base64', base64)
         this.$axios.post(`https://aip.baidubce.com/rpc/2.0/ai_custom/v1/detection/bottletransione0730?access_token="${this.$bus.access_token}"`, {
           image: base64
         })
@@ -103,8 +104,21 @@
           .catch( PermissionDeniedError => {
             console.log(PermissionDeniedError);
           })
+      },
+      downloadImage(el, name) {
+        // 通过选择器获取img元素
+        var img = el
+        // 将图片的src属性作为URL地址
+        var url = img.src
+        var a = document.createElement('a')
+        var event = new MouseEvent('click')
+
+        a.download = name || '下载图片名称'
+        a.href = url
+
+        a.dispatchEvent(event) //根据A标签的属性来搞事情
       }
-    },
+  },
     async mounted() {
       this.recoding = true
       this.dispatchVideo()

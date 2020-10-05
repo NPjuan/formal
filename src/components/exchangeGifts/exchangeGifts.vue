@@ -74,6 +74,9 @@
       },
       confirm() {
         console.log('兑换成功')
+        this.$bus.user.score = this.$bus.user.score - this.selectedValue.score
+        this.giftsCount[this.selectedIndex ]--
+        this.toggleMessage()
         this.giftRun()
       },
       cancel() {
@@ -84,6 +87,7 @@
         this.selected = !this.selected
       },
       getGiftsStatus() {
+        console.log('aaa')
         this.$axios.get('http://127.0.0.1:8080/BottleProject/gift/giftStatus')
           .then(({data}) => {
             const result = []
@@ -103,9 +107,6 @@
         this.$axios.get(`http://127.0.0.1:8080/BottleProject/gift/run/${index}`)
           .then(value => {
             console.log('value', value)
-            this.$bus.user.score = this.$bus.user.score - this.selectedValue.score
-            this.giftsCount[this.selectedIndex]--
-            this.toggleMessage()
           })
           .catch(reason => {
             console.log('reason', reason)
