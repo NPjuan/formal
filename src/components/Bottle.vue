@@ -94,16 +94,18 @@
         // 每个瓶子所获得的积分
         bottleValue: 100,
         // 等待状态
-        waiting: false
+        waiting: false,
+        getBottle: false
       }
     },
     methods: {
-      handleVideo(results) {
-        console.log('处理video')
+      handleVideo(res, getBottle) {
+        console.log('getBottle', getBottle)
+        this.getBottle = getBottle
         this.menuSize = false // 小屏幕
         // 这里延迟 250 是等待动画结束才能获取 dom e元素
         setTimeout(()=>{
-          this.$refs.Des.innerHTML = `当前回收的是塑料瓶`
+          this.$refs.Des.innerHTML = `${res}`
           this.company = '瓶'
         },500)
         // setTimeout(()=>{
@@ -122,11 +124,17 @@
         this.menuSize = false
         setTimeout(()=>{
           this.$refs.Des.innerHTML = `选择的礼物是${this.gifts[index]['name']}`
-        }, 250)
+        }, 500)
       },
       confirm() {
+        if (!this.getBottle) {
+          console.log('cancel')
+          this.cancel()
+          return
+        }
         // Todo 等待机器执行操作完毕
         // 切换动画
+        this.getBottle = false
         this.waiting = true
         // 调度机器接受瓶子
         this.$axios.get('http://127.0.0.1:8080/BottleProject/user/receiveBottle')
