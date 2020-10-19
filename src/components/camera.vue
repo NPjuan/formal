@@ -47,7 +47,8 @@
         // let imgEl = new Image()
         // imgEl.src = image
         // this.downloadImage(imgEl, 'img')
-        let base64 = image.replace('data:image/png;base64,', '')
+        // let base64 = image.replace('data:image/png;base64,', '')
+        console.log('image', image)
         canvas.toBlob((blob) => {
           let formData = new FormData()
           let file = new File(
@@ -60,25 +61,26 @@
         })
       },
       drawPic() {
-        setTimeout(this._filterPic(), 3000)
-        this.timer = setInterval(this._filterPic(), 6000)
+        setTimeout(this._filterPic, 2000)
+        // this.timer = setInterval(this._filterPic, 4000)
+        // this.timer = setInterval(this._filterPic(), 60000)
       },
       // 发送数据
       sendPic(formData) {
-        this.count++
-        if (this.count >= 4) this.endVideo()
-        // `https://aip.baidubce.com/rpc/2.0/ai_custom/v1/detection/bottletransione0730?access_token="${this.$bus.access_token}
         // 'http://192.168.1.107:8080/BottleProject/bottle/checkBottlePicture'
         this.$axios.post('http://192.168.1.107:8080/BottleProject/bottle/checkBottlePicture', formData)
-          .then(({data}) => {
+          .then(({ data }) => {
             let res = '识别不到瓶子'
             console.log('data', data)
-            if (data.code === '50000') {
+            if (data.code === '500000') {
               res = data.data
+              console.log('请求成功')
               this.$emit('handleVideo', res, true)
               this.recording = false
+              return
             }
-            this.$emit('handleVideo', res, false)
+            this.timer = setTimeout(this._filterPic, 4000)
+            // this.$emit('handleVideo', res, false)
           })
           .catch(err => {
             console.log('err', err)
