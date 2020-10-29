@@ -4,7 +4,7 @@
     <div class="center-show">
       <video ref="video" style="width: 100%;height: 100%;"></video>
     </div>
-    <canvas ref="canvas"></canvas>
+    <canvas width="1200" height="800" ref="canvas"></canvas>
     <clock
       @timeout="timeout"
       :count="60"
@@ -24,12 +24,7 @@
       }
     },
     methods: {
-      handleVedio() {
-        this.showVideo = false
-      },
       timeout() {
-        // 关闭摄像头
-        this.mediaStreamTrack && this.mediaStreamTrack.stop();
         this.$router.go(-1)
         console.log('关闭')
       },
@@ -38,7 +33,8 @@
         let video = this.$refs.video
         this.timer = setInterval(()=>{
           console.log('启动')
-          canvas.getContext("2d").drawImage(video, 0, 0, 500, 500);
+          canvas.getContext("2d").drawImage(video, 0, 0, 1200, 800);
+          console.log('content', canvas.getContext("2d"))
           canvas.toBlob((blob) => {
             let formData = new FormData()
             let file = new File(
@@ -64,29 +60,49 @@
           .catch((err)=>{
             console.log(err)
           })
+      },
+      dispatchMediaDevices(labelReg) {
+        // 是否支持媒体 API
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+          console.log("不支持 enumerateDevices() .");
+          return;
+        }
+        // 打开摄像头
+        const video = this.$refs.video;
+        // 列出相机和麦克风。
+        navigator.mediaDevices.enumerateDevices()
+          .then((devices) => {
+            let faceDeviceId = undefined
+            devices.forEach(({label, deviceId}) => {
+              console.log('deviceId', deviceId)
+              console.log('face', faceDeviceId)
+              if (label.match(labelReg)) {
+                faceDeviceId = deviceId
+              }
+            });
+            const constraints = faceDeviceId ? {
+              video: {
+                deviceId: faceDeviceId
+              }
+            } : { video: { facingMode: "user" } }
+            return navigator.mediaDevices.getUserMedia(constraints)
+          })
+          .then( MediaStream => {
+            console.log('video', MediaStream)
+            console.log(MediaStream.getTracks()[0])
+            this.mediaStreamTrack = typeof MediaStream.stop === 'function' ? MediaStream : MediaStream.getTracks()[0];
+            video.srcObject = MediaStream;
+            video.play();
+            console.log('开始')
+            this.drawPic()
+          })
+          .catch(err => {
+            console.log(err.name + ": " + err.message);
+          });
       }
     },
     mounted() {
-      // 打开摄像头
-      let video = this.$refs.video;
-      // facingMode: "user" 优先选择
-      let constraints = {
-        video: {
-          facingMode: 'user'
-        },
-        audio: false
-      };
-      let promise = navigator.mediaDevices.getUserMedia(constraints);
-      promise.then( MediaStream => {
-        console.log(MediaStream.getTracks()[0])
-        this.mediaStreamTrack = typeof MediaStream.stop === 'function' ? MediaStream : MediaStream.getTracks()[0];
-        video.srcObject = MediaStream;
-        video.play();
-        console.log('开始')
-        this.drawPic()
-      }).catch( PermissionDeniedError => {
-        console.log(PermissionDeniedError);
-      })
+      this.dispatchMediaDevices(/PC Camera/)
     },
     beforeDestroy() {
       this.mediaStreamTrack && this.mediaStreamTrack.stop();
@@ -113,8 +129,8 @@
     position:absolute;
     top:50%;
     left:50%;
-    width: 85%;
-    height: 80%;
+    width: 90%;
+    height: 90%;
     transform: translate(-50%,-50%);
   }
   .time{
@@ -125,9 +141,9 @@
   canvas{
     position: absolute;
     left: 0;
-    top:0;
-    width: 500px;
-    height: 500px;
+    top: 0;
+    width: 600px;
+    height: 400px;
     z-index: -100;
     opacity: 0;
   }

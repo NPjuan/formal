@@ -6,7 +6,6 @@
 </template>
 
 <script>
-  import { base640 } from '../assets/index'
   export default {
     name: "camera",
     props: {
@@ -62,13 +61,11 @@
       },
       drawPic() {
         setTimeout(this._filterPic, 2000)
-        // this.timer = setInterval(this._filterPic, 4000)
-        // this.timer = setInterval(this._filterPic(), 60000)
       },
       // 发送数据
       sendPic(formData) {
         // 'http://192.168.1.107:8080/BottleProject/bottle/checkBottlePicture'
-        this.$axios.post('http://192.168.1.107:8080/BottleProject/bottle/checkBottlePicture', formData)
+        this.$axios.post('http://127.0.0.1:8080/BottleProject/bottle/checkBottlePicture', formData)
           .then(({ data }) => {
             let res = '识别不到瓶子'
             console.log('data', data)
@@ -87,30 +84,49 @@
             this.endVideo()
           })
       },
-      async _getToken() {
-        const GRANT_TYPE = 'client_credentials'
-        const CLIENT_ID = 'CssdKlUA5tFSALHuNifU9fYi'
-        const CLIENT_SECRET = 'ovX0eovuDsIM3ayE4pdzRWc4GLR53HDK'
-        this.$axios.post(`/api/oauth/2.0/token`, {
-          config: {
-            params: {
-              grant_type: GRANT_TYPE,
-              client_id: CLIENT_ID,
-              client_secret: CLIENT_SECRET
-            }
-          }
-        })
-        .then(res => {
-          console.log('res', res)
-        })
-        .catch(err => {
-          console.log('err', err)
-        })
-      },
       endVideo() {
         this.mediaStreamTrack && this.mediaStreamTrack.stop();
-        clearInterval(this.timer)
+        this.timer && clearInterval(this.timer)
         console.log('摄像头已关闭')
+      },
+      dispatchMediaDevices(labelReg) {
+        // 是否支持媒体 API
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+          console.log("不支持 enumerateDevices() .");
+          return;
+        }
+        // 打开摄像头
+        const video = this.$refs.video;
+        // 列出相机和麦克风。
+        navigator.mediaDevices.enumerateDevices()
+          .then((devices) => {
+            let faceDeviceId = undefined
+            devices.forEach(({label, deviceId}) => {
+              console.log('deviceId', deviceId)
+              console.log('label', label)
+              if (label.match(labelReg)) {
+                faceDeviceId = deviceId
+              }
+            });
+            const constraints = faceDeviceId ? {
+              video: {
+                deviceId: faceDeviceId
+              }
+            } : { video: { facingMode: "user" } }
+            return navigator.mediaDevices.getUserMedia(constraints)
+          })
+          .then( MediaStream => {
+            console.log('video', MediaStream)
+            console.log(MediaStream.getTracks()[0])
+            this.mediaStreamTrack = typeof MediaStream.stop === 'function' ? MediaStream : MediaStream.getTracks()[0];
+            video.srcObject = MediaStream;
+            video.play();
+            console.log('开始')
+            this.drawPic()
+          })
+          .catch(err => {
+            console.log(err.name + ": " + err.message);
+          });
       },
       dispatchVideo() {
         // 打开摄像头
@@ -146,9 +162,8 @@
         a.dispatchEvent(event) //根据A标签的属性来搞事情
       }
   },
-    async mounted() {
-      this.recoding = true
-      this.dispatchVideo()
+    mounted() {
+      this.dispatchMediaDevices(/RMONCAM/)
     },
     beforeDestroy() {
       this.endVideo()

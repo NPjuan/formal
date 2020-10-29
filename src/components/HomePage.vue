@@ -13,7 +13,7 @@
       </div>
     <!--侧边栏-->
     <div id="side">
-      <img v-if="false" src="../assets/resource/brushFaceLogin.png" alt="brushFace" @click="brushFace">
+      <img src="../assets/resource/brushFaceLogin.png" alt="brushFace" @click="brushFace">
       <img v-if="false" src="../assets/resource/yct.png" alt="yct" @click="yct">
       <img src="../assets/resource/Instructions.png" alt="instructions" @click="instruction">
       <img src="../assets/resource/yct.png" alt="Inventory" @click="inventory">
